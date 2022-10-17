@@ -24,7 +24,7 @@ There are two things you can do about this warning:
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(flycheck-pycheckers flycheck helm util-ffip util-core jedi-core magit idle-highlight-mode hl-anything hl-todo yasnippet-snippets smartscan yafolding sphinx-doc virtualenvwrapper smartparens magit-todos jedi-direx iedit elpygen elpy company-jedi))
+   '(a string-inflection f find-file-in-project dash flycheck-pycheckers flycheck helm util-ffip util-core jedi-core magit idle-highlight-mode hl-anything hl-todo yasnippet-snippets smartscan yafolding sphinx-doc virtualenvwrapper smartparens magit-todos jedi-direx iedit elpygen elpy company-jedi))
  '(sp-override-key-bindings
    '(("C-M-f" . sp-forward-sexp)
      ("C-M-t" . sp-transpose-sexp)
