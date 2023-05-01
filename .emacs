@@ -24,7 +24,7 @@ There are two things you can do about this warning:
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(a string-inflection f find-file-in-project dash flycheck-pycheckers flycheck helm util-ffip util-core jedi-core magit idle-highlight-mode hl-anything hl-todo yasnippet-snippets smartscan yafolding sphinx-doc virtualenvwrapper smartparens magit-todos jedi-direx iedit elpygen elpy company-jedi use-package))
+   '(a string-inflection f find-file-in-project dash flycheck-pycheckers flycheck helm util-ffip util-core jedi-core magit idle-highlight-mode hl-anything hl-todo yasnippet-snippets smartscan yafolding sphinx-doc virtualenvwrapper smartparens magit-todos jedi-direx iedit elpygen elpy company-jedi use-package yaml yaml-mode))
  '(sp-override-key-bindings
    '(("C-M-f" . sp-forward-sexp)
      ("C-M-t" . sp-transpose-sexp)
@@ -47,6 +47,18 @@ There are two things you can do about this warning:
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
+
+(defvar emacs-minimal-config-style 'minimal
+  "Set the emacs minimal config style.
+It is one of \\='(micro, compact, minimal).
+
+\\='micro means to install no external packages and only configure inbuilt
+variables and add hacks to inbuilt packages.
+
+\\='compact means to install packages only from melpa and add hacks
+to those.
+
+\\='minimal means to add custom packages (via git or other means) also.")
 
 (setq default-truncate-lines t)
 (setq truncate-partial-width-windows nil)
@@ -290,6 +302,7 @@ There are two things you can do about this warning:
   :ensure t
   :defer t)
 (require 'f)
+
 (let ((util-dir (expand-file-name "~/lib/emacs-util")))
   ;; (if (f-exists-p util-dir)
   ;;     (let ((default-directory (expand-file-name "~/emacs-util")))
@@ -315,3 +328,46 @@ There are two things you can do about this warning:
 (setq dired-deletion-confirmer #'y-or-n-p)
 (setq dired-show-hidden-p nil)
 (setq dired-toggle-extension-list nil)
+
+(defun my/dired-mode-hook ()
+  (when (fboundp 'util/dired-copy-full-filename-as-kill)
+    (define-key dired-mode-map (kbd "w")
+      'util/dired-copy-full-filename-as-kill)))
+(add-hook 'dired-mode-hook 'my/dired-mode-hook)
+
+;; ibuffer
+
+(global-set-key (kbd "C-c i") 'ibuffer)
+
+(defun my/ibuffer-copy-full-filenames-as-kill ()
+  "Copy full buffer filename at point to kill ring without marking it.
+Only copies buffer at point even if region is set.  Defaults to
+copying marked buffers if there are any marked buffers."
+  (interactive)
+  (if (zerop (ibuffer-count-marked-lines))
+      (kill-new (buffer-file-name (ibuffer-current-buffer t)))
+    (ibuffer-copy-filename-as-kill 0)))
+
+(defun my/get-or-create-window-on-side ()
+  "Get the window on side if it exists else create it."
+  (let* ((orig-win (selected-window))
+         (win (cond ((window-in-direction 'right orig-win)
+                     (window-in-direction 'right orig-win))
+                    ((window-in-direction 'left orig-win)
+                     (window-in-direction 'left orig-win))
+                    (t (split-window-horizontally)))))
+    win))
+
+(defun ibuffer-visit-buffer-other-window (&optional noselect)
+    "Visit the buffer on this line in another window."
+    (interactive)
+    (let ((buf (ibuffer-current-buffer t))
+          (win (my/get-or-create-window-on-side)))
+      (bury-buffer (current-buffer))
+      (set-window-buffer win buf)
+      (unless noselect
+        (pop-to-buffer buf))))
+
+(defun my/ibuffer-mode-hook ()
+  (define-key ibuffer-mode-map (kbd "w") #'util/ibuffer-copy-full-filenames-as-kill)
+  (bind-key (kbd "o") #'ibuffer-visit-buffer-other-window-noselect ibuffer-mode-map))
