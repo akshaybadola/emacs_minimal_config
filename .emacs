@@ -140,6 +140,10 @@ to those.
 (add-hook 'python-mode-hook #'smartparens-mode)
 ; (add-hook 'python-mode-hook #'sphinx-doc-mode)
 
+(defun my/set-python-to-venv ()
+  (setq python-shell-interpreter (f-join pyvenv-virtual-env "bin" "python")))
+(add-to-list 'pyvenv-post-activate-hooks #'my/set-python-to-venv)
+
 (condition-case nil
     (require 'idle-highlight-mode)
   (defface idle-highlight
@@ -176,6 +180,11 @@ to those.
                                                        company-keywords))
   :bind ("C-;" . company-complete-common))
 
+(use-package f
+  :ensure t
+  :defer t)
+(require 'f)
+
 (use-package smartscan
   :ensure t
   :defer t)
@@ -183,6 +192,7 @@ to those.
 (global-smartscan-mode 1)
 (setq smartscan-use-extended-syntax t)
 (setq smartscan-symbol-selector "symbol")
+;; disable smartscan in comint
 (defun my/disable-smartscan ()
   (smartscan-mode -1))
 (add-hook 'comint-mode-hook 'my/disable-smartscan)
@@ -226,6 +236,7 @@ to those.
 (defun my/elpy-mode-hook ()
   (auto-fill-mode -1)
   (add-hook 'elpy-mode-hook 'flycheck-mode)
+  (setq-local flycheck-checker-error-threshold 2000)
   (setq flycheck-pycheckers-checkers '(flake8 mypy3))
   (setq flycheck-pycheckers-max-line-length 100)
   (setq flycheck-pycheckers-ignore-codes (split-string "E226,E303,H306,W503,W504" "," t))
@@ -244,7 +255,8 @@ to those.
   (setq elpy-formatter 'autopep8)
   (define-key elpy-mode-map (kbd "C-c C-c")
     'my/elpy-shell-send-region-or-buffer-and-step)
-  (define-key elpy-mode-map (kbd "C-c C-h") #'helm-semantic-or-imenu)
+  (when (package-installed-p 'helm)
+    (define-key elpy-mode-map (kbd "C-c C-h") #'helm-semantic-or-imenu))
   (define-key elpy-mode-map (kbd "C-c C-o") #'org-open-at-point)
   (define-key elpy-mode-map (kbd "C-M-i") #'sp-splice-sexp-killing-backward))
 
@@ -298,26 +310,29 @@ to those.
           (forward-line (1- line))
           (forward-char col))))))
 
-(use-package f
-  :ensure t
-  :defer t)
-(require 'f)
+
+;; when helm
+(when (package-installed-p 'helm)
+  (setq helm-M-x-show-short-doc t)
+  (global-set-key (kbd "M-x") 'helm-M-x))
+
+;; util
+;;
+;; (if (f-exists-p util-dir)
+;;     (let ((default-directory (expand-file-name "~/emacs-util")))
+;;       (async-shell-command "git pull --rebase"))
+;;   (let ((default-directory (expand-file-name "~")))
+;;     (async-shell-command "git clone https://github.com/akshaybadola/emacs-util")))
+;; (when (and (f-exists? util-dir) (not (package-installed-p 'util)))
+;;   (package-install-file (f-join util-dir "util.el")))
+;; (when (package-installed-p 'util)
+;;   (require 'util))
+
 
 (let ((util-dir (expand-file-name "~/lib/emacs-util")))
-  ;; (if (f-exists-p util-dir)
-  ;;     (let ((default-directory (expand-file-name "~/emacs-util")))
-  ;;       (async-shell-command "git pull --rebase"))
-  ;;   (let ((default-directory (expand-file-name "~")))
-  ;;     (async-shell-command "git clone https://github.com/akshaybadola/emacs-util")))
-  ;; (when (and (f-exists? util-dir) (not (package-installed-p 'util)))
-  ;;   (package-install-file (f-join util-dir "util.el")))
-  ;; (when (package-installed-p 'util)
-  ;;   (require 'util))
-
   (when (f-exists? util-dir)
     (add-to-list 'load-path util-dir))
-  (require 'util/all "util-all")
-  )
+  (require 'util/all "util-all"))
 
 
 ;; dired
@@ -371,3 +386,21 @@ copying marked buffers if there are any marked buffers."
 (defun my/ibuffer-mode-hook ()
   (define-key ibuffer-mode-map (kbd "w") #'util/ibuffer-copy-full-filenames-as-kill)
   (bind-key (kbd "o") #'ibuffer-visit-buffer-other-window-noselect ibuffer-mode-map))
+
+
+;; misc
+
+(defun my/repeat-last-extended-command (&optional pref-arg)
+  (interactive "p")
+  (let* ((pref-arg (if pref-arg (- pref-arg 1) 0))
+         (cmd (nth pref-arg extended-command-history)))
+    (if cmd
+        (command-execute (intern cmd))
+      (user-error "Given index %s out of bounds of command history" pref-arg))))
+(global-set-key (kbd "C-x z") #'my/repeat-last-extended-command)
+
+;; Redirect all gppg pin entries to remacs
+(setf epg-pinentry-mode 'loopback)
+
+;; Use electric quoting
+(setq electric-quote-string t)
