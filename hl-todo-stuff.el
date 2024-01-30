@@ -1,0 +1,26 @@
+(use-package hl-todo
+    :ensure t
+    :defer t)
+
+(add-hook 'python-mode-hook 'hl-todo-mode)
+(add-hook 'emacs-lisp-mode-hook 'hl-todo-mode)
+(add-hook 'js-mode-hook 'hl-todo-mode)
+(setq hl-todo-keyword-faces
+      (quote (("TODO" :foreground "red" :weight bold)
+              ("FIXED" :foreground "forest green" :weight bold)
+              ("DONE" :foreground "forest green" :weight bold)
+              ("HOLD" :foreground "#d0bf8f" :weight bold)
+              ("NEXT" :foreground "#dca3a3" :weight bold)
+              ("THEM" :foreground "#dc8cc3" :weight bold)
+              ("PROG" :foreground "#7cb8bb" :weight bold)
+              ("OKAY" :foreground "#7cb8bb" :weight bold)
+              ("DONT" :foreground "#5f7f5f" :weight bold)
+              ("FAIL" :foreground "#8c5353" :weight bold)
+              ("DONE" :foreground "#afd8af" :weight bold)
+              ("NOTE" :foreground "#d0bf8f" :weight bold)
+              ("KLUDGE" :foreground "#d0bf8f" :weight bold)
+              ("HACK" :foreground "#d0bf8f" :weight bold)
+              ("TEMP" :foreground "#d0bf8f" :weight bold)
+              ("FIXME" :foreground "red" :weight bold)
+              ("XXX+" :foreground "#cc9393" :weight bold)
+              ("\\?\\?\\?+" :foreground "#cc9393" :weight bold))))

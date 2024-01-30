@@ -24,7 +24,7 @@ There are two things you can do about this warning:
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(a string-inflection f find-file-in-project dash flycheck-pycheckers flycheck helm util-ffip util-core jedi-core magit idle-highlight-mode hl-anything hl-todo yasnippet-snippets smartscan yafolding sphinx-doc virtualenvwrapper smartparens magit-todos jedi-direx iedit elpygen elpy company-jedi use-package yaml yaml-mode))
+   '(org-cdlatex cdlatex company-bibtex websocket request eldoc-overlay dired-rainbow company-math auctex projectile company json-mode dired-filter forge a string-inflection f find-file-in-project dash flycheck-pycheckers flycheck helm util-ffip util-core jedi-core magit idle-highlight-mode hl-anything hl-todo yasnippet-snippets smartscan yafolding sphinx-doc virtualenvwrapper smartparens magit-todos jedi-direx iedit elpygen elpy company-jedi use-package yaml yaml-mode))
  '(sp-override-key-bindings
    '(("C-M-f" . sp-forward-sexp)
      ("C-M-t" . sp-transpose-sexp)
@@ -46,361 +46,146 @@ There are two things you can do about this warning:
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- )
+ '(default ((((type tty) (background dark)) (:background "black")) (t (:family "Liberation Mono" :background "ivory" :slant normal :weight normal :height 110 :width normal))))
+ '(dired-mark ((t (:background "white" :foreground "black" :weight ultra-bold))))
+ '(idle-highlight-idle-time 0.3)
+ '(org-block ((t (:inherit fixed-pitch))))
+ '(org-scheduled-today ((t (:foreground "DarkGreen" :weight bold)))))
 
-(defvar emacs-minimal-config-style 'minimal
+(defvar emacs-minimal-config-style 'micro
   "Set the emacs minimal config style.
-It is one of \\='(micro, compact, minimal).
+It is one of \\='(micro mini minimal compact more).
 
 \\='micro means to install no external packages and only configure inbuilt
 variables and add hacks to inbuilt packages.
 
-\\='compact means to install packages only from melpa and add hacks
-to those.
+\\='small means to install SOME packages only from melpa and add hacks for them.
 
-\\='minimal means to add custom packages (via git or other means) also.")
+\\='minimal means to install MORE packages only from melpa and add hacks for them.
 
-(setq default-truncate-lines t)
-(setq truncate-partial-width-windows nil)
+\\='compact means to add custom packages (via git or other means) also.
 
-;; And the command that caches long lines
-(setq cache-long-line-scans t)
-(global-set-key [f12] 'toggle-truncate-lines)
+\\='more means to add even MORE packages.")
 
-(setq select-active-regions nil)
-(setq save-interprogram-paste-before-kill nil)
-(setq x-select-enable-clipboard t)
-(setq x-select-enable-primary t)
+(defvar emacs-minimal-config-style-to-num
+  '((micro . 1) (small . 2) (minimal . 3) (compact . 4) (more . 5))
+  "Symbol to number mapping for `emacs-minimal-config-style'.")
 
-;; iedit set key
-(require 'iedit)
-(if window-system
-    (global-set-key (kbd "C-.") #'iedit-mode)
-  (global-set-key (kbd "C-x .") #'iedit-mode)
-  (global-set-key (kbd "C-x ;") #'comment-line))
+(setq emacs-minimal-config-style 'compact)
 
+(load "~/emacs_config/set-vars.el")
 
-(setq-default indent-tabs-mode nil)
+(defun my/install-for (symb)
+  (>= (assg emacs-minimal-config-style emacs-minimal-config-style-to-num)
+      (assg symb emacs-minimal-config-style-to-num)))
 
-;; fill-column has to be 80, not whatever else
-(setq-default fill-column 80)
-;; (setq request-backend (quote url-retrieve))
-(setq scroll-bar-mode (quote right))
-(show-paren-mode t)
+(defvar my/emacs-libdir nil
+  "Directory where custom emacs libraries are stored")
 
-(put 'upcase-region 'disabled nil)
-(put 'downcase-region 'disabled nil)
-(put 'narrow-to-region 'disabled nil)
-(put 'narrow-to-page 'disabled nil)
+(defvar my/python-libdir nil
+  "Directory where custom python libraries are stored")
 
-(setq ido-everywhere t)
-(setq ido-max-directory-size 100000)
-(ido-mode 'both)
-
-; Use the current window when visiting files and buffers with ido
-(setq ido-default-file-method 'selected-window)
-(setq ido-default-buffer-method 'selected-window)
-(setq ido-enable-flex-matching t)
-
-;; org 9 ido or actually ido everywhere enhancement?
-(setq ido-ubiquitous-mode t)
-
-;; smartparens
-;; Should set keybindings also
-(smartparens-global-mode t)
-
-(add-hook 'python-mode-hook 'hl-todo-mode)
-(add-hook 'emacs-lisp-mode-hook 'hl-todo-mode)
-(add-hook 'js-mode-hook 'hl-todo-mode)
-(setq hl-todo-keyword-faces
-      (quote (("TODO" :foreground "red" :weight bold)
-              ("FIXED" :foreground "forest green" :weight bold)
-              ("DONE" :foreground "forest green" :weight bold)
-              ("HOLD" :foreground "#d0bf8f" :weight bold)
-              ("NEXT" :foreground "#dca3a3" :weight bold)
-              ("THEM" :foreground "#dc8cc3" :weight bold)
-              ("PROG" :foreground "#7cb8bb" :weight bold)
-              ("OKAY" :foreground "#7cb8bb" :weight bold)
-              ("DONT" :foreground "#5f7f5f" :weight bold)
-              ("FAIL" :foreground "#8c5353" :weight bold)
-              ("DONE" :foreground "#afd8af" :weight bold)
-              ("NOTE" :foreground "#d0bf8f" :weight bold)
-              ("KLUDGE" :foreground "#d0bf8f" :weight bold)
-              ("HACK" :foreground "#d0bf8f" :weight bold)
-              ("TEMP" :foreground "#d0bf8f" :weight bold)
-              ("FIXME" :foreground "red" :weight bold)
-              ("XXX+" :foreground "#cc9393" :weight bold)
-              ("\\?\\?\\?+" :foreground "#cc9393" :weight bold))))
-;; (seq-do (lambda (x) (package-install x)) '(hl-anything hl-todo yasnippet-snippets smartscan yafolding sphinx-doc virtualenvwrapper smartparens magit-todos jedi-direx iedit elpy company-jedi idle-highlight-mode))
+(load "~/emacs_config/init-vars.el")
+(load "~/emacs_config/misc-funcs-and-commands.el")
 
 
-;; hideshow enabled in python-mode
-(add-hook 'python-mode-hook #'hs-minor-mode)
-(add-hook 'python-mode-hook #'yafolding-mode)
-(add-hook 'python-mode-hook #'smartparens-mode)
-; (add-hook 'python-mode-hook #'sphinx-doc-mode)
+(load "~/emacs_config/ibuffer-dired.el")
+; (load (concat (file-name-directory load-file-name) "ibuffer-dired.el"))
 
-(defun my/set-python-to-venv ()
-  (setq python-shell-interpreter (f-join pyvenv-virtual-env "bin" "python")))
-(add-to-list 'pyvenv-post-activate-hooks #'my/set-python-to-venv)
+(when (my/install-for 'small)
+  (load "~/emacs_config/smartparens-smartscan-stuff.el") ; (expand-file-name "~/.emacs.d/smartparens-stuff.el")
+  (load "~/emacs_config/hl-todo-stuff.el")
+  (use-package a
+    :ensure t
+    :defer t)
 
-(condition-case nil
-    (require 'idle-highlight-mode)
-  (defface idle-highlight
-    '((t (:background "grey90")))
-    "Face used to highlight other occurrences of the word at point.")
-  (defun idle-highlight-word-at-point ()
-    "Highlight the word under the point."
-    (if idle-highlight-mode
-        (let ((target (and (thing-at-point 'symbol)
-                           (substring-no-properties (thing-at-point 'symbol)))))
-          (idle-highlight-unhighlight)
-          (when (and target
-                     (not (in-string-p))
-                     ;; (looking-at-p "\\s_\\|\\sw") ;; Symbol characters
-                     (not (member target idle-highlight-exceptions)))
-            ;; NOTE: Was (concat "\\<" (regexp-quote target) "\\>")
-            (setq idle-highlight-regexp (concat "\\_<" (regexp-quote target) "\\_>"))
-            (highlight-regexp idle-highlight-regexp 'idle-highlight)))))
-  (error nil))
+  (use-package f
+    :ensure t
+    :defer t)
+  (require 'f)
 
-(use-package company
-  :ensure t
-  :defer t
-  :init (add-hook 'after-init-hook 'global-company-mode)
-  :config
-  (setq company-idle-delay              0.1
-        company-tooltip-idle-delay      0.1
-	company-minimum-prefix-length   2
-	company-show-numbers            t
-	company-tooltip-limit           20
-	company-dabbrev-downcase        nil
-        company-backends                '(company-capf company-files
-                                                       company-gtags company-etags
-                                                       company-keywords))
-  :bind ("C-;" . company-complete-common))
+  (use-package yaml
+    :ensure t
+    :defer t)
+  (load "~/emacs_config/json-yaml.el")
+  (load "~/emacs_config/git-stuff.el")
+  (load "~/emacs_config/hacks-small.el"))
 
-(use-package f
-  :ensure t
-  :defer t)
-(require 'f)
+(when (my/install-for 'minimal)
+  (use-package iedit
+    :ensure t
+    :defer t)
+  (require 'iedit)
 
-(use-package smartscan
-  :ensure t
-  :defer t)
-(require 'smartscan)
-(global-smartscan-mode 1)
-(setq smartscan-use-extended-syntax t)
-(setq smartscan-symbol-selector "symbol")
-;; disable smartscan in comint
-(defun my/disable-smartscan ()
-  (smartscan-mode -1))
-(add-hook 'comint-mode-hook 'my/disable-smartscan)
+  (use-package yafolding
+    :ensure t
+    :defer t)
 
-(require 'smartparens-config)
-(smartparens-global-mode t)
-(sp-with-modes '(markdown-mode gfm-mode)
-  (sp-local-pair "$" "$")
-  (sp-local-pair "$$" "$$"))
+  (use-package flycheck
+    :ensure t
+    :defer t)
 
-(sp-with-modes 'org-mode
-  (sp-local-pair "$" "$")
-  (sp-local-pair "$$" "$$"))
+  (if window-system
+      (global-set-key (kbd "C-.") #'iedit-mode)
+    (global-set-key (kbd "C-x .") #'iedit-mode))
+  (use-package company
+    :ensure t
+    :defer t
+    :init (add-hook 'after-init-hook 'global-company-mode)
+    :config
+    (setq company-idle-delay              0.1
+          company-tooltip-idle-delay      0.1
+	  company-minimum-prefix-length   2
+	  company-show-numbers            t
+	  company-tooltip-limit           20
+	  company-dabbrev-downcase        nil
+          company-backends                '(company-capf company-files
+                                                         company-gtags company-etags
+                                                         company-keywords))
+    :bind ("C-;" . company-complete-common))
 
-(sp-with-modes 'rst-mode
-  (sp-local-pair ":" ":")
-  (sp-local-pair "<" ">"))
+  (use-package find-file-in-project
+    :ensure t
+    :defer t)
 
-(sp-with-modes 'python-mode
-  (sp-local-pair ":" ":" :when '(sp-in-docstring-p)))
+  (use-package projectile
+    :ensure t
+    :defer t)
 
-(setq python-shell-interpreter "python3")
-(require 'elpy)
-(elpy-enable)
-(setq elpy-rpc-python-command "python3")
-(setq elpy-rpc-backend "jedi")
+  (load "~/emacs_config/lisp-stuff.el")
 
-(defun my/elpy-shell-send-region-or-buffer-and-step ()
-  (interactive)
-  (when current-prefix-arg
-    (elpy-shell-kill t))
-  (elpy-shell-send-region-or-buffer-and-step))
+  (load "~/emacs_config/python-stuff.el")
 
-(setq elpy-rpc-timeout 10)
-
-(setq python-shell-completion-native-enable nil)
-(when (require 'flycheck nil t)
-    (setq elpy-modules (delq 'elpy-module-flymake elpy-modules)))
-(remove-hook 'flymake-diagnostic-functions 'flymake-proc-legacy-flymake)
-
-(defun my/elpy-mode-hook ()
-  (auto-fill-mode -1)
-  (add-hook 'elpy-mode-hook 'flycheck-mode)
-  (setq-local flycheck-checker-error-threshold 2000)
-  (setq flycheck-pycheckers-checkers '(flake8 mypy3))
-  (setq flycheck-pycheckers-max-line-length 100)
-  (setq flycheck-pycheckers-ignore-codes (split-string "E226,E303,H306,W503,W504" "," t))
-  (with-eval-after-load 'flycheck
-    (add-hook 'flycheck-mode-hook #'flycheck-pycheckers-setup))
-  (define-key python-mode-map (kbd "C-c C-n")
-    #'flycheck-next-error)
-  (define-key python-mode-map (kbd "C-c C-p")
-    #'flycheck-previous-error)
-  (define-key elpy-mode-map (kbd "C-c C-n")
-    #'flycheck-next-error)
-  (define-key elpy-mode-map (kbd "C-c C-p")
-    #'flycheck-previous-error)
-  ;; (setq-local current-word-highlight-context nil)
-  (highlight-indentation-mode 1)
-  (setq elpy-formatter 'autopep8)
-  (define-key elpy-mode-map (kbd "C-c C-c")
-    'my/elpy-shell-send-region-or-buffer-and-step)
+  (use-package helm
+    :ensure t
+    :defer t)
   (when (package-installed-p 'helm)
-    (define-key elpy-mode-map (kbd "C-c C-h") #'helm-semantic-or-imenu))
-  (define-key elpy-mode-map (kbd "C-c C-o") #'org-open-at-point)
-  (define-key elpy-mode-map (kbd "C-M-i") #'sp-splice-sexp-killing-backward))
+    (setq helm-M-x-show-short-doc t)
+    (global-set-key (kbd "M-x") 'helm-M-x))
+  (load "~/emacs_config/hacks-minimal.el"))
 
-(add-hook 'elpy-mode-hook 'flycheck-mode)
-(add-hook 'elpy-mode-hook 'my/elpy-mode-hook)
+(when (my/install-for 'compact)
+  (load "~/emacs_config/latex-stuff.el")
 
-(defun elpy--fix-code-with-formatter (method)
-  "Common routine for formatting python code."
-  (let ((line (line-number-at-pos))
-        (col (current-column))
-        (directory (if (elpy-project-root)
-                       (expand-file-name (elpy-project-root))
-                     default-directory)))
-    (if (use-region-p)
-        (let* ((beg (region-beginning))
-               (end (region-end))
-               (offset (progn (save-excursion
-                                (save-restriction
-                                  (narrow-to-region beg end)
-                                  (goto-char beg)
-                                  (while (string-match-p "^ *$" (buffer-substring-no-properties
-                                                                 (line-beginning-position)
-                                                                 (line-end-position)))
-                                    (forward-line))
-                                  (beginning-of-line)
-                                  (setq beg (point))
-                                  (prog1 (string-join (-repeat (current-indentation) " "))
-                                    (when (re-search-forward "^ *$" nil t)
-                                      (forward-line -1)
-                                      (end-of-line)
-                                      (setq end (point))))))))
-               (new-block (elpy-rpc method
-                                    (list (replace-regexp-in-string
-                                           (concat "^" offset) ""
-                                           (buffer-substring-no-properties beg end))
-                                          directory))))
-          (setq new-block (replace-regexp-in-string
-                           "^\\(.+\\)"
-                           (concat offset "\\1") new-block))
-          (elpy-buffer--replace-region
-           beg end (string-trim-right new-block))
-          (goto-char end)
-          (deactivate-mark))
-      (let ((new-block (elpy-rpc method
-                                 (list (elpy-rpc--buffer-contents)
-                                       directory)))
-            (beg (point-min))
-            (end (point-max)))
-        (elpy-buffer--replace-region beg end new-block)
-        (when (bobp)
-          (forward-line (1- line))
-          (forward-char col))))))
+  (use-package string-inflection
+    :ensure t
+    :defer t)
 
+  ; Emacs util
+  (let ((util-dir (f-join my/emacs-libdir "emacs-util")))
+    (when (file-exists-p util-dir)
+      (add-to-list 'load-path util-dir))
+    (require 'util/all "util-all")
+    (load "~/emacs_config/util-vars.el"))
 
-;; when helm
-(when (package-installed-p 'helm)
-  (setq helm-M-x-show-short-doc t)
-  (global-set-key (kbd "M-x") 'helm-M-x))
+  (when window-system
+    (load "~/emacs_config/init-gui.el"))
+  (load "~/emacs_config/hacks-compact.el"))
 
-;; util
-;;
-;; (if (f-exists-p util-dir)
-;;     (let ((default-directory (expand-file-name "~/emacs-util")))
-;;       (async-shell-command "git pull --rebase"))
-;;   (let ((default-directory (expand-file-name "~")))
-;;     (async-shell-command "git clone https://github.com/akshaybadola/emacs-util")))
-;; (when (and (f-exists? util-dir) (not (package-installed-p 'util)))
-;;   (package-install-file (f-join util-dir "util.el")))
-;; (when (package-installed-p 'util)
-;;   (require 'util))
+(when (my/install-for 'more)
 
+  ; add mail mu4e
 
-(let ((util-dir (expand-file-name "~/lib/emacs-util")))
-  (when (f-exists? util-dir)
-    (add-to-list 'load-path util-dir))
-  (require 'util/all "util-all"))
-
-
-;; dired
-
-(setq dired-listing-switches "-alh --group-directories-first")
-(setq dired-recursive-deletes 'always)
-(setq dired-recursive-copies 'always)
-(setq dired-deletion-confirmer #'y-or-n-p)
-(setq dired-show-hidden-p nil)
-(setq dired-toggle-extension-list nil)
-
-(defun my/dired-mode-hook ()
-  (when (fboundp 'util/dired-copy-full-filename-as-kill)
-    (define-key dired-mode-map (kbd "w")
-      'util/dired-copy-full-filename-as-kill)))
-(add-hook 'dired-mode-hook 'my/dired-mode-hook)
-
-;; ibuffer
-
-(global-set-key (kbd "C-c i") 'ibuffer)
-
-(defun my/ibuffer-copy-full-filenames-as-kill ()
-  "Copy full buffer filename at point to kill ring without marking it.
-Only copies buffer at point even if region is set.  Defaults to
-copying marked buffers if there are any marked buffers."
-  (interactive)
-  (if (zerop (ibuffer-count-marked-lines))
-      (kill-new (buffer-file-name (ibuffer-current-buffer t)))
-    (ibuffer-copy-filename-as-kill 0)))
-
-(defun my/get-or-create-window-on-side ()
-  "Get the window on side if it exists else create it."
-  (let* ((orig-win (selected-window))
-         (win (cond ((window-in-direction 'right orig-win)
-                     (window-in-direction 'right orig-win))
-                    ((window-in-direction 'left orig-win)
-                     (window-in-direction 'left orig-win))
-                    (t (split-window-horizontally)))))
-    win))
-
-(defun ibuffer-visit-buffer-other-window (&optional noselect)
-    "Visit the buffer on this line in another window."
-    (interactive)
-    (let ((buf (ibuffer-current-buffer t))
-          (win (my/get-or-create-window-on-side)))
-      (bury-buffer (current-buffer))
-      (set-window-buffer win buf)
-      (unless noselect
-        (pop-to-buffer buf))))
-
-(defun my/ibuffer-mode-hook ()
-  (define-key ibuffer-mode-map (kbd "w") #'util/ibuffer-copy-full-filenames-as-kill)
-  (bind-key (kbd "o") #'ibuffer-visit-buffer-other-window-noselect ibuffer-mode-map))
-
-
-;; misc
-
-(defun my/repeat-last-extended-command (&optional pref-arg)
-  (interactive "p")
-  (let* ((pref-arg (if pref-arg (- pref-arg 1) 0))
-         (cmd (nth pref-arg extended-command-history)))
-    (if cmd
-        (command-execute (intern cmd))
-      (user-error "Given index %s out of bounds of command history" pref-arg))))
-(global-set-key (kbd "C-x z") #'my/repeat-last-extended-command)
-
-;; Redirect all gppg pin entries to remacs
-(setf epg-pinentry-mode 'loopback)
-
-;; Use electric quoting
-(setq electric-quote-string t)
+  ; big library
+  (when window-system
+    (load "~/emacs_config/ref-man-stuff.el")))
