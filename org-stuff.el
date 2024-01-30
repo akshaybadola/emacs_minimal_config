@@ -1047,9 +1047,6 @@ COMMAND, ARG, and IGNORED are used by `company-mode'."
 (use-package cdlatex
   :ensure t
   :defer t)
-(use-package org-cdlatex
-  :ensure t
-  :defer t)
 
 (add-to-list 'load-path (expand-file-name (concat my/emacs-libdir "/" "org-fragtog")))
 (defun my/org-minor-modes ()
