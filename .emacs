@@ -93,6 +93,7 @@ variables and add hacks to inbuilt packages.
 ; (load (concat (file-name-directory load-file-name) "ibuffer-dired.el"))
 
 (when (my/install-for 'small)
+  (setq confirm-kill-emacs 'y-or-n-p)
   (load "~/emacs_config/smartparens-smartscan-stuff.el") ; (expand-file-name "~/.emacs.d/smartparens-stuff.el")
   (load "~/emacs_config/hl-todo-stuff.el")
   (use-package a
