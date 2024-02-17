@@ -18,13 +18,16 @@ There are two things you can do about this warning:
   (setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3"))
 (setq vc-follow-symlinks t)
 
+(require 'package)
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(package-selected-packages
-   '(org-cdlatex cdlatex company-bibtex websocket request eldoc-overlay dired-rainbow company-math auctex projectile company json-mode dired-filter forge a string-inflection f find-file-in-project dash flycheck-pycheckers flycheck helm util-ffip util-core jedi-core magit idle-highlight-mode hl-anything hl-todo yasnippet-snippets smartscan yafolding sphinx-doc virtualenvwrapper smartparens magit-todos jedi-direx iedit elpygen elpy company-jedi use-package yaml yaml-mode))
  '(sp-override-key-bindings
    '(("C-M-f" . sp-forward-sexp)
      ("C-M-t" . sp-transpose-sexp)
@@ -71,7 +74,7 @@ variables and add hacks to inbuilt packages.
   '((micro . 1) (small . 2) (minimal . 3) (compact . 4) (more . 5))
   "Symbol to number mapping for `emacs-minimal-config-style'.")
 
-(setq emacs-minimal-config-style 'compact)
+(setq emacs-minimal-config-style 'minimal)
 
 (load "~/emacs_config/set-vars.el")
 

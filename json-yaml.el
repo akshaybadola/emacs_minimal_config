@@ -6,7 +6,11 @@
   (use-package json-mode
     :ensure t
     :defer t)
-   (require 'json-mode))
+  (require 'json-mode)
+  (use-package yaml-mode
+    :ensure t
+    :defer t)
+  (require 'yaml-mode))
 
 (add-hook 'yaml-mode-hook 'highlight-indentation-mode)
 (add-hook 'yaml-mode-hook 'my/yaml-mode-hook)
