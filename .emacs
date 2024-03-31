@@ -28,6 +28,8 @@ There are two things you can do about this warning:
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(package-selected-packages
+   '(yasnippet-snippets company-math auctex dired-rainbow string-inflection yaml-mode eldoc-overlay helm idle-highlight-mode elpy projectile find-file-in-project company flycheck yafolding iedit forge magit json-mode yaml a hl-todo smartparens smartscan dired-filter use-package cmake-mode))
  '(sp-override-key-bindings
    '(("C-M-f" . sp-forward-sexp)
      ("C-M-t" . sp-transpose-sexp)
@@ -74,7 +76,7 @@ variables and add hacks to inbuilt packages.
   '((micro . 1) (small . 2) (minimal . 3) (compact . 4) (more . 5))
   "Symbol to number mapping for `emacs-minimal-config-style'.")
 
-(setq emacs-minimal-config-style 'minimal)
+(setq emacs-minimal-config-style 'compact)
 
 (load "~/emacs_config/set-vars.el")
 

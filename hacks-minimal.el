@@ -115,11 +115,14 @@ With positive ARG search backwards, else search forwards."
          (min-indentation (if (python-info-current-line-empty-p)
                               most-positive-fixnum
                             (current-indentation)))
+         (python-beg-defun-arity (func-arity 'python-info-looking-at-beginning-of-defun))
          (body-indentation
           (save-excursion
             (python-nav-beginning-of-statement)
             (and (> arg 0)
-                 (or (and (python-info-looking-at-beginning-of-defun nil t)
+                 (or (and (apply 'python-info-looking-at-beginning-of-defun
+                                 (if (= (cdr python-beg-defun-arity) 1) nil
+                                   (list nil t)))
                           (+ (save-excursion
                                (python-nav-beginning-of-statement)
                                (current-indentation))
@@ -137,7 +140,9 @@ With positive ARG search backwards, else search forwards."
                            0))))))
          (found
           (progn
-            (when (and (python-info-looking-at-beginning-of-defun nil t)
+            (when (and (apply 'python-info-looking-at-beginning-of-defun
+                        (if (= (cdr python-beg-defun-arity) 1) nil
+                          (list nil t)))
                        (or (< arg 0)
                            ;; If looking at beginning of defun, and if
                            ;; pos is > line-content-start, ensure a
@@ -157,7 +162,9 @@ With positive ARG search backwards, else search forwards."
                             (and (> arg 0)
                                  (not (= (current-indentation) 0))
                                  (>= (current-indentation) body-indentation)))))
-            (and (python-info-looking-at-beginning-of-defun nil t)
+            (and (apply 'python-info-looking-at-beginning-of-defun
+                        (if (= (cdr python-beg-defun-arity) 1) nil
+                          (list nil t)))
                  (or (not (= (line-number-at-pos pos)
                              (line-number-at-pos)))
                      (and (>= (point) line-beg-pos)
