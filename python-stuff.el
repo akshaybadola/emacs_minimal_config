@@ -134,14 +134,16 @@ prefix is given, run all tests in the current project."
   (comment-indent)
   (insert "type: ignore"))
 
-(use-package idle-highlight-mode
-  :ensure t
-  :defer t)
+(unless (version< emacs-version "27")
+  (use-package idle-highlight-mode
+    :ensure t
+    :defer t))
 (defun my/elpy-mode-hook ()
   (auto-fill-mode -1)
   ;; (setq-local current-word-highlight-context nil)
   (setq-local flycheck-checker-error-threshold 2000)
-  (idle-highlight-mode 1)
+  (unless (version< emacs-version "27")
+    (idle-highlight-mode 1))
   (highlight-indentation-mode 1)
   (define-key elpy-mode-map (kbd "C-c C-c")
     'my/elpy-shell-send-region-or-buffer-and-step)
