@@ -19,7 +19,6 @@
       tool-bar-mode nil
       scroll-bar-mode nil)
 
-
 (use-package desktop+
   :ensure t
   :defer t)
@@ -33,7 +32,15 @@
   (if (eq (desktop-owner) (emacs-pid))
       (desktop-save desktop-dirname)))
 (add-hook 'auto-save-hook 'my-desktop-save)
-(server-start)
+(if (server-running-p)
+    (if (y-or-n-p "Emacs Server is already running. Should we continue? ")
+        (message "Continuing with startup")
+      (kill-emacs))
+  (server-start))
+
+(when (package-installed-p 'ace-window)
+  (require 'ace-window)
+  (global-set-key (kbd "M-o") 'ace-window))
 
 (use-package pdf-tools
   :ensure t
@@ -124,4 +131,3 @@ NEW-WINDOW is not used."
 (add-hook 'image-mode-hook 'my-image-mode-hook)
 
 (load "~/emacs_config/org-stuff.el")
-

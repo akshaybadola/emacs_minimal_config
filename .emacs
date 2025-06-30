@@ -30,6 +30,7 @@ There are two things you can do about this warning:
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    '(yasnippet-snippets company-math auctex dired-rainbow string-inflection yaml-mode eldoc-overlay helm idle-highlight-mode elpy projectile find-file-in-project company flycheck yafolding iedit forge magit json-mode yaml a hl-todo smartparens smartscan dired-filter use-package cmake-mode))
+ '(idle-highlight-idle-time 0.3)
  '(sp-override-key-bindings
    '(("C-M-f" . sp-forward-sexp)
      ("C-M-t" . sp-transpose-sexp)
@@ -53,9 +54,21 @@ There are two things you can do about this warning:
  ;; If there is more than one, they won't work right.
  '(default ((((type tty) (background dark)) (:background "black")) (t (:family "Liberation Mono" :background "ivory" :slant normal :weight normal :height 110 :width normal))))
  '(dired-mark ((t (:background "white" :foreground "black" :weight ultra-bold))))
- '(idle-highlight-idle-time 0.3)
  '(org-block ((t (:inherit fixed-pitch))))
  '(org-scheduled-today ((t (:foreground "DarkGreen" :weight bold)))))
+
+;; Add Windows specific default fonts
+(when (eq window-system 'w32)
+  (custom-theme-set-faces
+   'user
+   '(default ((((type tty) (background dark)) (:background "black"))
+              (t (:family "Cascadia Mono"
+                          :background "ivory"
+                          :slant normal
+                          :weight normal
+                          :height 100
+                          :width normal)))))
+  (set-face-attribute 'fixed-pitch nil :font "Cascadia Mono"))
 
 (defvar emacs-minimal-config-style 'micro
   "Set the emacs minimal config style.
@@ -114,6 +127,7 @@ variables and add hacks to inbuilt packages.
     :ensure t
     :defer t)
   (load "~/emacs_config/json-yaml.el")
+  (setq my/load-org-git nil)
   (load "~/emacs_config/git-stuff.el")
   (load "~/emacs_config/hacks-small.el"))
 
@@ -167,6 +181,7 @@ variables and add hacks to inbuilt packages.
     :defer t)
   (when (package-installed-p 'helm)
     (setq helm-M-x-show-short-doc t)
+    (setq helm-move-to-line-cycle-in-source nil)
     (global-set-key (kbd "M-x") 'helm-M-x))
   (load "~/emacs_config/hacks-minimal.el"))
 
@@ -189,9 +204,7 @@ variables and add hacks to inbuilt packages.
   (load "~/emacs_config/hacks-compact.el"))
 
 (when (my/install-for 'more)
-
-  ; add mail mu4e
-
+  ; add mail mu4e?
   ; big library
   (when window-system
     (load "~/emacs_config/ref-man-stuff.el")))

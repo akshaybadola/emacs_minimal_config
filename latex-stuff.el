@@ -5,6 +5,10 @@
     :ensure t
     :defer t)
 
+(when (file-exists-p (concat my/emacs-libdir "/" "math-preview"))
+  (add-to-list 'load-path (concat my/emacs-libdir "/" "math-preview"))
+  (require 'math-preview))
+
 (defun my/helm-texdoc (pkg)
   "Search and display TeX documentation with `helm'."
   (interactive (let ((pkg (read-from-minibuffer "Package Name? ")))

@@ -366,6 +366,20 @@ for internal and \"file\" links, or stored as a parameter in
 	     (wrong-number-of-arguments
 	      (funcall (org-link-get-parameter type :follow) path)))))))))
 
+(defun org-latex--clear-preview-subr (beg end)
+  "Use appropriate function to clear latex preview in region.
+BEG, END are beginning and end of regions respectively."
+  (if org-latex-use-math-preview
+      (math-preview-clear-region beg end)
+    (org-clear-latex-preview beg end)))
+
+(defun org-latex--add-preview-subr (beg end &optional clear-cache)
+  "Use appropriate function to add latex preview in region.
+BEG, END are beginning and end of regions respectively."
+  (if org-latex-use-math-preview
+      (math-preview-region beg end)
+    (org--latex-preview-region beg end clear-cache)))
+
 ;; HACK: For clearing the cache for a particular org latex segment
 (defun org-latex-preview (&optional arg)
   "Toggle preview of the LaTeX fragment at point.
@@ -391,17 +405,17 @@ fragments in the buffer."
    ((not (display-graphic-p)) nil)
    ;; Clear whole buffer.
    ((equal arg 64)
-    (org-clear-latex-preview (point-min) (point-max))
+    (org-latex--clear-preview-subr (point-min) (point-max))
     (message "LaTeX previews removed from buffer"))
    ;; Preview whole buffer.
    ((equal arg 16)
     (message "Creating LaTeX previews in buffer...")
-    (org--latex-preview-region (point-min) (point-max))
+    (org-latex--add-preview-subr (point-min) (point-max))
     (message "Creating LaTeX previews in buffer... done."))
    ;; Clear current section.
    ;; NOTE: Different here
    ((equal arg 5)
-    (org-clear-latex-preview
+    (org-latex--clear-preview-subr
      (if (org-before-first-heading-p) (point-min)
        (save-excursion
 	 (org-with-limited-levels (org-back-to-heading t) (point))))
@@ -415,7 +429,7 @@ fragments in the buffer."
 		 (message "LaTeX preview removed")
 	       (message "Creating LaTeX preview...")
                ;; NOTE: Different here
-	       (org--latex-preview-region beg end (equal arg 4))
+	       (org-latex--add-preview-subr beg end (equal arg 4))
 	       (message "Creating LaTeX preview... done."))
 	     t))))
    ;; Preview current section.
@@ -426,7 +440,7 @@ fragments in the buffer."
 	  (end (org-with-limited-levels (org-entry-end-position))))
       (message "Creating LaTeX previews in section...")
       ;; NOTE: Different here
-      (org--latex-preview-region beg end (equal arg 4))
+      (org-latex--add-preview-subr beg end (equal arg 4))
       (message "Creating LaTeX previews in section... done.")))))
 
 (defun org--latex-preview-region (beg end &optional clear-cache)

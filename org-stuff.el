@@ -65,7 +65,6 @@
   (define-key org-mode-map (kbd "C-c k s") #'org-kanban/shift)
   (define-key org-mode-map (kbd "C-c k i") #'org-kanban//initialize-mirrored-kanban-at-point))
 
-
 (defun my/org-occur-bold-keywords ()
   (interactive)
   (let* ((case-fold-search t)
@@ -998,8 +997,9 @@ subtree one level down."
     :defer t)
 (require 'company-bibtex)
 ;; NOTE: Change the following also in company-bibtex.el in case it ever updates
-(setq company-bibtex-bibliography (f-files "~/org/bibs/"))
-(setq bibtex-completion-bibliography (f-files "~/org/bibs/"))
+(when (f-exists? "~/org/bibs/")
+  (setq company-bibtex-bibliography (f-files "~/org/bibs/"))
+  (setq bibtex-completion-bibliography (f-files "~/org/bibs/")))
 (defconst company-bibtex-pandoc-citation-regex "@"
   "Regex for pandoc citation prefix.")
 
@@ -1055,6 +1055,17 @@ COMMAND, ARG, and IGNORED are used by `company-mode'."
   (org-cdlatex-mode 1)
   (require 'org-fragtog)
   (org-fragtog-mode 1))
+
+;; Use math preview instead of `org-late-preview' if available
+(when (featurep 'math-preview)
+  (setq org-latex-use-math-preview t)
+  (setq org-fragtog-use-math-preview t)
+  (require 'math-preview)
+  (setq math-preview-use-http t)
+  (setq math-preview-http-server-url "http://localhost:3131")
+  (let ((default-directory (concat my/emacs-libdir "/" "math-preview")))
+    (start-process "*math-preview-process*" "*math-preview-process*"
+                   "node" "math-preview-http.js")))
 
 (defun my/org-company-settings ()
   (setq-local company-backends company-backends)
