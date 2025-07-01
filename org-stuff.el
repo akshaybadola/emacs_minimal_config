@@ -215,14 +215,15 @@ See also `util/org-copy-subtree-elems-with-property' and
 
 ;; Convenience functions to jump across PDF_FILE links
 (defun my/org-next-link ()
-"Like `org-next-link' but goto PDF link wihout prefix arg."
+  "Like `org-next-link' but goto PDF link wihout prefix arg."
   (interactive)
   (if current-prefix-arg
       (when (re-search-forward org-link-any-re)
         (backward-char)
         (org-reveal))
-      (when (re-search-forward " +:PDF_FILE: +\\[.+]\\|\\[file://.+pdf]\\|\\[/home/.+pdf]\\|\\[~/.+pdf]")
-        (org-reveal))))
+    (when (re-search-forward
+           " +:PDF_FILE: +\\[.+]\\|\\[file://.+pdf]\\|\\[/home/.+pdf]\\|\\[~/.+pdf]")
+      (org-reveal))))
 
 (defun my/org-previous-link ()
   "Like `org-previous-link' but goto PDF link wihout prefix arg."
@@ -231,13 +232,14 @@ See also `util/org-copy-subtree-elems-with-property' and
       (when (re-search-backward org-link-any-re)
         (forward-char)
         (org-reveal))
-    (when (re-search-backward " +:PDF_FILE: +\\[.+]\\|\\[file://.+pdf]\\|\\[/home/.+pdf]\\|\\[~/.+pdf]")
+    (when (re-search-backward
+           " +:PDF_FILE: +\\[.+]\\|\\[file://.+pdf]\\|\\[/home/.+pdf]\\|\\[~/.+pdf]")
       (org-reveal))))
 
 (defun my/org-code (&optional delimiter)
   "Surround current word with code block delimiter ~."
   (interactive)
-  (pcase-let ((`(,beg . ,end) (my/bounds-of-word-at-point))
+  (pcase-let ((`(,beg . ,end) (util/bounds-of-word-at-point))
               (delimiter (or delimiter "~")))
     (cond ((region-active-p)
            (goto-char beg)

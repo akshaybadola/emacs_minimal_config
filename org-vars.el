@@ -107,8 +107,11 @@
 (setq org-goto-interface 'outline-path-complition)
 (setq org-outline-path-complete-in-steps nil)
 
+;; Emphasis alist
+(setq org-emphasis-alist
+      '(("*" bold) ("/" italic) ("_" underline) ("=" org-verbatim verbatim)
+        ("~" markdown-inline-code-face verbatim) ("+" (:strike-through t))))
 
-;; NOTE: org-emphasis-alist is set via customize
 ;; Hide ** // etc
 (setq org-hide-emphasis-markers nil)
 (setq org-link-file-path-type 'absolute)
